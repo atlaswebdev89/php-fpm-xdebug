@@ -1,0 +1,72 @@
+version: "3.8"
+
+networks:
+  rest-api:
+    driver: bridge
+
+volumes:
+  rest-mysql:
+
+services:
+  php-fpm:
+    container_name: php-rest
+    image: docker.io/bitnami/php-fpm:latest
+    restart: unless-stopped
+    volumes:
+      - ./app:/var/www/html
+    networks:
+      - rest-api
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_rest
+    restart: unless-stopped
+    ports:
+      - "8101:80"
+    volumes:
+      # Это конфиги для хостов
+      - ./nginx-config:/etc/nginx/conf.d
+      # Это файлы сайтов
+      - ./app:/var/www/html
+      - ./logs:/var/log/nginx
+    networks:
+      - rest-api
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql-server-rest
+    restart: always
+    ports:
+      - 8102:3306
+    environment:
+      MYSQL_DATABASE: app
+      MYSQL_USER: app
+      MYSQL_PASSWORD: app
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./dump-task:/docker-entrypoint-initdb.d
+      - rest-mysql:/var/lib/mysql
+    networks:
+      - rest-api
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin-rest
+    restart: always
+    ports: 
+      - 8103:80
+    environment:
+      PMA_HOST: mysql
+    depends_on:
+      - mysql
+    networks:
+      - rest-api
+
+  adminer:
+    image: adminer:latest
+    container_name: db_adminer_rest
+    restart: always
+    ports:
+      - 8104:8080
+    networks:
+      - rest-api
