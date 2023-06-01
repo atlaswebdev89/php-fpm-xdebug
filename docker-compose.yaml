@@ -10,10 +10,17 @@ volumes:
 services:
   php-fpm:
     container_name: php-rest
-    image: docker.io/bitnami/php-fpm:latest
+    # image: docker.io/bitnami/php-fpm:latest
+    build:
+      context: ./fpm
+      dockerfile: Dockerfile
     restart: unless-stopped
     volumes:
       - ./app:/var/www/html
+      # Конфиги для php
+      - ./fpm/xdebug.ini:/etc/php/8.2/mods-available/xdebug.ini
+    extra_hosts:
+      - "xdebug-phpstorm.my:192.168.100.30"
     networks:
       - rest-api
 
