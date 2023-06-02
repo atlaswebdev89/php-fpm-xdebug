@@ -8,3 +8,8 @@ $arr = array_values($arr);
 sort($arr);
 
 var_dump($arr);
+
+
+echo PHP_VERSION;
+
+echo phpversion();
